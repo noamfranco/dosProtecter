@@ -11,7 +11,7 @@ class rateCounter:
 
     def clean_cell(self,i):
         self.total_events -= self.lst1[i]
-        print(self.total_events)
+        print(self.lst1[i])
         self.lst1[i] = 0
     
     def add_cell(self,i,num_events):
