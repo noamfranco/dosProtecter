@@ -11,7 +11,6 @@ class rateCounter:
 
     def clean_cell(self,i):
         self.total_events -= self.lst1[i]
-        print(self.lst1[i])
         self.lst1[i] = 0
     
     def add_cell(self,i,num_events):
@@ -23,6 +22,7 @@ class rateCounter:
         
         if self.index_time + self.time_frame < time.time():
             self.lst1 = [0] * self.time_frame
+            self.total_events = 0
         
         index1 = (int(time_report) % self.time_frame)
         index2 = (self.index) % self.time_frame
@@ -45,11 +45,9 @@ def test():
     rate = rateCounter()
     for i in range(60):
         rate.add_event()
-        print(rate.lst1)
         time.sleep(0.5)
     for i in range(30):
         rate.add_event()
-        print(rate.lst1)
         time.sleep(1)
 
 if __name__ == "__main__":
