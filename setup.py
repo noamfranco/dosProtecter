@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'dosprotecter',         # How you named your package folder (MyLib)
   packages = ['dosprotecter'],   # Chose the same as "name"
-  version = '0.41',      # Start with a small number and increase it with every change you make
+  version = '0.42',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Package that protect servers from dos and ddos attacks',   # Give a short description about your library
   author = 'Noam Franco',                   # Type in your name

@@ -32,9 +32,10 @@ class DosProtecter:
 
     def add_report(self,ip):
         self.counter += 1
-        if ip in self.in_quarantine and self.jail_times[ip] < time.time() - self.jail_time:
-            self.in_quarantine.remove(ip)
-        
+        if ip in self.in_quarantine:
+            if self.jail_times[ip] < time.time() - self.jail_time:
+                self.in_quarantine.remove(ip)
+            return
         if not ip in self.ips_behaviors:
             self.ips_behaviors[ip] = rateCounter(self.time_frame)
         
