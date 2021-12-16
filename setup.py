@@ -11,7 +11,6 @@ setup(
   download_url = 'https://github.com/noamfranco/dosProtecter/archive/tag.tar.gz',    # I explain this later on
   keywords = ['Cyber', 'Dos', 'Ddos'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
-          'time',
           'smtplib',
       ],
   classifiers=[
