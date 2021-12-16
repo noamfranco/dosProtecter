@@ -1,7 +1,5 @@
 import time
-from limitLearner import *
-from rateCounter import *
-from constants import *
+from . import *
 import smtplib
 
 class DosProtecter:
