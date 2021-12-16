@@ -35,6 +35,7 @@ class DosProtecter:
         if ip in self.in_quarantine:
             if self.jail_times[ip] < time.time() - self.jail_time:
                 self.in_quarantine.remove(ip)
+                self.ips_behaviors[ip] = rateCounter(self.time_frame)
             return
         if not ip in self.ips_behaviors:
             self.ips_behaviors[ip] = rateCounter(self.time_frame)
