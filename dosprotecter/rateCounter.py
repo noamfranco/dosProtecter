@@ -1,5 +1,5 @@
 import time
-from constants import *
+from dosprotecter.constants import *
 class rateCounter:
     def __init__(self,time_frame) -> None:
         self.lst1 = [0] * TIME_FRAME
