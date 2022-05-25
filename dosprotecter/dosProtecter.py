@@ -3,6 +3,7 @@ from dosprotecter.limitLearner import *
 from dosprotecter.constants import *
 from dosprotecter.rateCounter import *
 import smtplib
+import matplotlib.pyplot as plt
 
 class DosProtecter:
     def __init__(self,seed_rate,jail_time = JAIL_TIME,dos_trshould = DOS_TRESHOULD,
@@ -14,6 +15,7 @@ class DosProtecter:
         self.ddos_treshould = ddos_treshould
         self.email_service = False
         self.builder()
+        self.quarentine_lst = []
     
     def builder(self):
         self.last_email_time = 0
@@ -29,9 +31,14 @@ class DosProtecter:
         self.send_username = send_username
         self.send_pass = send_pass
         self.email_service = True
+        
+    def plot_quarntine(self):
+        plt.plot(self.quarentine_lst)
+        plt.show()
 
     def add_report(self,ip):
         self.counter += 1
+        
         if ip in self.in_quarantine:
             if self.jail_times[ip] < time.time() - self.jail_time:
                 self.in_quarantine.remove(ip)
@@ -39,6 +46,8 @@ class DosProtecter:
             return
         if not ip in self.ips_behaviors:
             self.ips_behaviors[ip] = rateCounter(self.time_frame)
+        
+        self.quarentine_lst.append(self.in_quarantine)
         
         events = self.ips_behaviors[ip].add_event()
         if events > self.limit_learner.normal_rate * self.dos_treshould:
