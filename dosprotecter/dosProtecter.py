@@ -33,12 +33,15 @@ class DosProtecter:
         self.email_service = True
         
     def plot_quarntine(self):
-        plt.plot(self.quarentine_lst)
+        print(self.quarentine_lst)
+        plt.plot(list(self.quarentine_lst))
         plt.show()
 
     def add_report(self,ip):
         self.counter += 1
         
+        self.quarentine_lst.append(len(self.in_quarantine))
+
         if ip in self.in_quarantine:
             if self.jail_times[ip] < time.time() - self.jail_time:
                 self.in_quarantine.remove(ip)
@@ -47,7 +50,7 @@ class DosProtecter:
         if not ip in self.ips_behaviors:
             self.ips_behaviors[ip] = rateCounter(self.time_frame)
         
-        self.quarentine_lst.append(self.in_quarantine)
+        
         
         events = self.ips_behaviors[ip].add_event()
         if events > self.limit_learner.normal_rate * self.dos_treshould:
