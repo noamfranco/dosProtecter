@@ -3,7 +3,11 @@ from dosprotecter.limitLearner import *
 from dosprotecter.constants import *
 from dosprotecter.rateCounter import *
 import smtplib
-import matplotlib.pyplot as plt
+import pycountry
+#import matplotlib.pyplot as plt
+from urllib.request import urlopen
+from json import load
+
 
 class DosProtecter:
     def __init__(self,seed_rate,jail_time = JAIL_TIME,dos_trshould = DOS_TRESHOULD,
@@ -15,6 +19,7 @@ class DosProtecter:
         self.ddos_treshould = ddos_treshould
         self.email_service = False
         self.builder()
+
         self.quarentine_lst = []
     
     def builder(self):
@@ -37,20 +42,19 @@ class DosProtecter:
         plt.plot(list(self.quarentine_lst))
         plt.show()
 
-    def add_report(self,ip):
+    def add_report(self, ip):
         self.counter += 1
         
-        self.quarentine_lst.append(len(self.in_quarantine))
-
         if ip in self.in_quarantine:
             if self.jail_times[ip] < time.time() - self.jail_time:
                 self.in_quarantine.remove(ip)
+                self.hasher.update_ip_hashes(self.in_quarantine)
                 self.ips_behaviors[ip] = rateCounter(self.time_frame)
+            self.quarentine_lst.append(len(self.in_quarantine))
             return
+
         if not ip in self.ips_behaviors:
             self.ips_behaviors[ip] = rateCounter(self.time_frame)
-        
-        
         
         events = self.ips_behaviors[ip].add_event()
         if events > self.limit_learner.normal_rate * self.dos_treshould:
@@ -60,26 +64,48 @@ class DosProtecter:
         elif time.time() - self.ips_behaviors[ip].start_time > self.time_frame:
             self.limit_learner.add_report(events,min(0.1,(1 / self.counter)))
 
-        if len(self.in_quarantine) > self.ddos_treshould:
+        if len(self.in_quarantine) > self.ddos_treshould and not self.in_ddos_mode:
             self.ddos_mode_on()
             if self.email_service and time.time() > self.last_email_time:
                 self.send_email()
+        
+        self.quarentine_lst.append(len(self.in_quarantine))
+
+        return ip in self.in_quarantine
             
-    
     def ddos_mode_on(self):
-        if self.in_ddos_mode:
-            return 
-        print('You Are being ddos attacked!!')
-        self.initial_limit = self.limit_learner.normal_rate
-        self.limit_learner.normal_rate /= 1.8
-        self.in_ddos_mode = True
+        if not self.in_ddos_mode:
+            print('You Are being ddos attacked!!')
+            self.initial_limit = self.limit_learner.normal_rate
+            self.limit_learner.normal_rate /= 1.8
+            self.in_ddos_mode = True
     
     def ddos_mode_off(self):
-        if not self.in_ddos_mode:
-            return
-        self.limit_learner.normal_rate = self.initial_limit
-        self.in_ddos_mode = False
-
+        if self.in_ddos_mode:
+            self.limit_learner.normal_rate = self.initial_limit
+            self.in_ddos_mode = False
+    
+    def get_ips_regions(self):
+        regions = [self.get_ip_region(ip) for ip in self.in_quarantine]
+        print(regions)
+        return regions
+    
+    def get_ip_region(self, addr=''):
+        if addr == '':
+            url = 'https://ipinfo.io/json'
+        else:
+            url = 'https://ipinfo.io/' + addr + '/json'
+        try:
+            res = urlopen(url)
+            #response from url(if res==None then check connection)
+            data = load(res)
+            #will load the json response into data
+            if 'country' in data:
+                return pycountry.countries.get(alpha_2=data['country']).name
+            else:
+                return 'Unknown'
+        except:
+            return 'Unknown'
 
     def send_email(self):
         gmail_user = self.send_username
@@ -88,7 +114,7 @@ class DosProtecter:
         sent_from = gmail_user
         to = [self.mail]
         subject = "Youre being ddos attacked"
-        body = 'Youre being ddos attacked'
+        body = f'Youre being ddos attacked the suspicious ips regions are: {self.get_ips_regions()}'
 
         message = """From: %s\nTo: %s\nSubject: %s\n\n%s
     """ % (sent_from, ", ".join(to), subject, body)
